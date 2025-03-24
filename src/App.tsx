@@ -17,6 +17,7 @@ function App() {
   const [userAnswers, setUserAnswers] = useState<Record<number, string>>({});
   const [loading, setLoading] = useState(true);
   const [testCompleted, setTestCompleted] = useState(false);
+  const [testStarted, setTestStarted] = useState(false); // New state to track if test has started
   const [personality, setPersonality] = useState<WarnaPersonality | null>(null);
   const [kelebihan, setKelebihan] = useState<KeunggulanPersonality[]>([]);
   const [kelemahan, setKelemahan] = useState<KelemahanPersonality[]>([]);
@@ -50,6 +51,11 @@ function App() {
       setLoading(false);
     }
   }
+
+  // Fungsi untuk memulai tes
+  const startTest = () => {
+    setTestStarted(true);
+  };
 
   // Mendapatkan pilihan jawaban untuk pertanyaan saat ini
   const getCurrentChoices = () => {
@@ -178,6 +184,7 @@ function App() {
     setUserAnswers({});
     setCurrentQuestionIndex(0);
     setTestCompleted(false);
+    setTestStarted(false); // Reset juga status test started
     setPersonality(null);
     setKelebihan([]);
     setKelemahan([]);
@@ -257,84 +264,113 @@ function App() {
         </header>
 
         {!testCompleted ? (
-          <>
-            {/* Progress Bar */}
-            <div className="w-full h-2 bg-gray-200 rounded-full mb-8">
-              <div 
-                className="h-full bg-blue-600 rounded-full" 
-                style={{ width: `${progress}%` }}
-              ></div>
-            </div>
-            
-            {currentQuestion && (
-              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-xl">
-                <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4">
-                  <h2 className="text-xl text-white font-medium">
-                    Pertanyaan {currentQuestionIndex + 1} dari {questions.length}
-                  </h2>
-                </div>
-                <div className="p-6">
-                  <p className="text-xl text-gray-800 mb-6">{currentQuestion.pertanyaan}</p>
-                  <div className="space-y-4">
-                    {currentChoices.map((choice) => (
-                      <label
-                        key={choice.id_pilihan}
-                        className={clsx(
-                          "block rounded-xl cursor-pointer transition-all duration-200",
-                          "border-2",
-                          userAnswers[currentQuestion.id] === choice.nilai_pilihan
-                            ? "border-blue-500 bg-blue-50"
-                            : "border-gray-200 hover:border-blue-300 hover:bg-gray-50"
-                        )}
-                      >
-                        <div className="p-4">
-                          <div className="flex items-start gap-4">
-                            <div className="flex items-center justify-center w-8 h-8 rounded-full border-2 border-current shrink-0">
-                              {choice.nilai_pilihan}
-                            </div>
-                            <div>
-                              <div className="text-gray-600">{choice.teks_pilihan}</div>
-                            </div>
-                            <input
-                              type="radio"
-                              name="question"
-                              value={choice.nilai_pilihan}
-                              checked={userAnswers[currentQuestion.id] === choice.nilai_pilihan}
-                              onChange={() => handleAnswer(choice.nilai_pilihan)}
-                              className="sr-only"
-                            />
-                          </div>
-                        </div>
-                      </label>
-                    ))}
-                  </div>
-                  
-                  <div className="flex justify-between mt-6">
-                    <button 
-                      onClick={handlePrevQuestion}
-                      disabled={currentQuestionIndex === 0}
-                      className={`px-6 py-2 rounded-md transition-colors ${
-                        currentQuestionIndex === 0 
-                          ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
-                          : 'bg-blue-600 text-white hover:bg-blue-700'
-                      }`}
-                    >
-                      Kembali
-                    </button>
-                    
-                    {userAnswers[currentQuestion.id] && currentQuestionIndex < questions.length - 1 && (
-                      <button 
-                        onClick={() => handleAnswer(userAnswers[currentQuestion.id])}
-                        className="px-6 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition-colors"
-                      >
-                        Selanjutnya
-                      </button>
-                    )}
-                  </div>
+          !testStarted ? (
+            // Tampilan sebelum test dimulai
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-xl">
+              <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4">
+                <h2 className="text-xl text-white font-medium">
+                  Selamat Datang di Color Personality Test
+                </h2>
+              </div>
+              <div className="p-6">
+                <p className="text-lg text-gray-700 mb-6">
+                  Temukan kepribadian warna Anda melalui serangkaian pertanyaan sederhana.
+                  Tes ini akan membantu Anda memahami karakteristik kepribadian Anda berdasarkan warna dominan.
+                </p>
+                <p className="text-lg text-gray-700 mb-8">
+                  Tes ini terdiri dari {questions.length} pertanyaan. Pilihlah jawaban yang paling sesuai dengan diri Anda.
+                </p>
+                <div className="text-center">
+                  <button 
+                    onClick={startTest}
+                    className="px-8 py-3 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition-colors font-medium text-lg"
+                  >
+                    Mulai Tes
+                  </button>
                 </div>
               </div>
-            )}
-          </>
+            </div>
+          ) : (
+            // Tampilan saat test sudah dimulai
+            <>
+              {/* Progress Bar */}
+              <div className="w-full h-2 bg-gray-200 rounded-full mb-8">
+                <div 
+                  className="h-full bg-blue-600 rounded-full" 
+                  style={{ width: `${progress}%` }}
+                ></div>
+              </div>
+              
+              {currentQuestion && (
+                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-xl">
+                  <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4">
+                    <h2 className="text-xl text-white font-medium">
+                      Pertanyaan {currentQuestionIndex + 1} dari {questions.length}
+                    </h2>
+                  </div>
+                  <div className="p-6">
+                    <p className="text-xl text-gray-800 mb-6">{currentQuestion.pertanyaan}</p>
+                    <div className="space-y-4">
+                      {currentChoices.map((choice) => (
+                        <label
+                          key={choice.id_pilihan}
+                          className={clsx(
+                            "block rounded-xl cursor-pointer transition-all duration-200",
+                            "border-2",
+                            userAnswers[currentQuestion.id] === choice.nilai_pilihan
+                              ? "border-blue-500 bg-blue-50"
+                              : "border-gray-200 hover:border-blue-300 hover:bg-gray-50"
+                          )}
+                        >
+                          <div className="p-4">
+                            <div className="flex items-start gap-4">
+                              <div className="flex items-center justify-center w-8 h-8 rounded-full border-2 border-current shrink-0">
+                                {choice.nilai_pilihan}
+                              </div>
+                              <div>
+                                <div className="text-gray-600">{choice.teks_pilihan}</div>
+                              </div>
+                              <input
+                                type="radio"
+                                name="question"
+                                value={choice.nilai_pilihan}
+                                checked={userAnswers[currentQuestion.id] === choice.nilai_pilihan}
+                                onChange={() => handleAnswer(choice.nilai_pilihan)}
+                                className="sr-only"
+                              />
+                            </div>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                    
+                    <div className="flex justify-between mt-6">
+                      <button 
+                        onClick={handlePrevQuestion}
+                        disabled={currentQuestionIndex === 0}
+                        className={`px-6 py-2 rounded-md transition-colors ${
+                          currentQuestionIndex === 0 
+                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                            : 'bg-blue-600 text-white hover:bg-blue-700'
+                        }`}
+                      >
+                        Kembali
+                      </button>
+                      
+                      {userAnswers[currentQuestion.id] && currentQuestionIndex < questions.length - 1 && (
+                        <button 
+                          onClick={() => handleAnswer(userAnswers[currentQuestion.id])}
+                          className="px-6 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                        >
+                          Selanjutnya
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
+          )
         ) : (
           personality ? (
             <div className={`bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl ${getBgColorClass(personality.warna)}`}>
