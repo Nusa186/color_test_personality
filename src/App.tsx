@@ -384,19 +384,53 @@ function App() {
                 {/* Statistik Jawaban */}
                 {stats && (
                   <div className="mb-6">
+                    <h3 className={`text-xl font-semibold mb-3 ${getColorClass(personality.warna)}`}>Statistik Jawaban</h3>
+                    
                     <div className="grid grid-cols-4 gap-4 mb-4">
-                      <div className="bg-red-100 p-3 rounded-lg text-center">
-                        
-                      </div>
-                      <div className="bg-yellow-100 p-3 rounded-lg text-center">
-                        
-                      </div>
-                      <div className="bg-green-100 p-3 rounded-lg text-center">
-                        
-                      </div>
-                      <div className="bg-blue-100 p-3 rounded-lg text-center">
-                        
-                      </div>
+                      {Object.entries(stats)
+                        .sort(([, countA], [, countB]) => (countB as number) - (countA as number))
+                        .map(([option, count]) => {
+                          // Mendapatkan warna background berdasarkan opsi
+                          const getBgColor = () => {
+                            switch(option) {
+                              case 'A': return 'bg-red-100';
+                              case 'B': return 'bg-yellow-100';
+                              case 'C': return 'bg-green-100';
+                              case 'D': return 'bg-blue-100';
+                              default: return 'bg-gray-100';
+                            }
+                          };
+                          
+                          const getTextColor = () => {
+                            switch(option) {
+                              case 'A': return 'text-red-700';
+                              case 'B': return 'text-yellow-700';
+                              case 'C': return 'text-green-700';
+                              case 'D': return 'text-blue-700';
+                              default: return 'text-gray-700';
+                            }
+                          };
+                          
+                          // Menghitung persentase
+                          const percentage = Math.round((count as number) / Object.values(stats).reduce((a, b) => a + (b as number), 0) * 100);
+                          
+                          return (
+                            <div key={option} className={`${getBgColor()} p-3 rounded-lg text-center`}>
+                              <div className={`w-8 h-8 rounded-full flex items-center justify-center mx-auto mb-2 font-bold ${getTextColor()} border-2 border-current`}>
+                                {option}
+                              </div>
+                              <div className={`font-semibold ${getTextColor()}`}>
+                                {count}
+                              </div>
+                              <div className="mt-2 bg-white rounded-full h-3 overflow-hidden">
+                                <div 
+                                  className={`h-full ${option === 'A' ? 'bg-red-500' : option === 'B' ? 'bg-yellow-500' : option === 'C' ? 'bg-green-500' : 'bg-blue-500'}`}
+                                  style={{ width: `${percentage}%` }}
+                                ></div>
+                              </div>
+                            </div>
+                          );
+                        })}
                     </div>
                   </div>
                 )}
